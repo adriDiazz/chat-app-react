@@ -2,6 +2,16 @@ const bycrypt = require('bcrypt');
 const User = require('../model/user');
 const userRouter = require('express').Router();
 
+
+userRouter.get('/', async (req, res, next) => {
+    try {
+        const users = await User.find({});
+        res.json(users);
+    }catch(err){
+        next(err);
+    }
+})
+
 userRouter.post('/register', async (req, res, next) => {
     try {
         const { username, email, password} = req.body;

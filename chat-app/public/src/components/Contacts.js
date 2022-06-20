@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import logo from '../assets/logo.png';
+import notSelectedImage from '../assets/notSelectedImage.png';
 import styled from 'styled-components';
+import ChatContainer from './ChatContainer';
 const ContactList = ({ contacts, currentUser, changeChat }) => {
     const [currentUsername, setCurrentUsername] = useState(undefined);
     const [currentUserImage, setCurrentUserImage] = useState(undefined);
@@ -47,9 +49,7 @@ const ContactList = ({ contacts, currentUser, changeChat }) => {
             }
             {
                 
-                currentSelected === undefined && (
-                    <div>CHORIXZO</div>
-                )
+
             }
             
         </>
@@ -112,11 +112,6 @@ const Container = styled.div`
             background-color: #a5a5a8;
         }
     }
-
-
-
-
-
-
 `
+
 export default ContactList;

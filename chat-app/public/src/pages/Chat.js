@@ -1,21 +1,25 @@
-import React,{useState, useEffect, useCallback} from 'react';
+import React,{useState, useEffect, useCallback, useRef} from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import axios from 'axios';
 import ContactList from '../components/Contacts';
+import ChatContainer from '../components/ChatContainer';
+import notSelectedImage from '../assets/notSelectedImage.png';
+import io from 'socket.io-client';
 const Chat = () => {
+    const socket = useRef()
     const navigate = useNavigate();
     const [contacts, setContacts] = useState([]);
     const [currentUser, setCurrentUser] = useState({});
     const [chat, setChat] = useState(undefined);
 
     const getContacts = useCallback( async() => {
-        console.log(currentUser.isAvatarImage)
+        
         if(currentUser) {
             if(currentUser.isAvatarImage) {
                 
                 const {data} = await axios.get(`http://localhost:3001/api/users/${currentUser._id}`);
-                console.log(data)
+                
                 setContacts(data.users);
             }else{
                 //console.log('here2')
@@ -38,18 +42,33 @@ const Chat = () => {
     }, [navigate]);
 
     useEffect(() => {
+        if(currentUser){
+            socket.current = io.connect('http://localhost:3001');
+            socket.current.emit('add-user', currentUser._id);
+        }
+    }, [currentUser])
+
+    useEffect(() => {
         getContacts().catch(err => console.log(err));        
     }, [navigate, currentUser,getContacts]);
 
     return (
         <>
             <Container>
-                <button className='logout-button' onClick={() => {localStorage.removeItem('user'); navigate('/login')}}>Logout</button>
-
                 <div className='container'>
                     <ContactList contacts={contacts} currentUser={currentUser} changeChat={handleChatChange}/>
+                    {
+                    chat === undefined ?
+                            <ContainerImage>
+                                <img src={notSelectedImage} alt='welcomeImage'/>
+                                <span>Welcome to Vchat lets talk!</span>
+                            </ContainerImage>
+                        :
+                            <ChatContainer selected={chat} currentUser={currentUser} socket={socket}/>
+                 }
                 </div>
-            </Container>
+
+            </Container> 
         </>
     );
 }
@@ -70,8 +89,19 @@ const Container = styled.div`
         display: grid;
         grid-template-columns: 25% 75%;
     }
+`
 
-
-
+const ContainerImage = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    img {
+        height: 25rem;
+    }
+    span {
+        color: black;
+        font-size: 2rem;
+    }
 `
 export default Chat;
